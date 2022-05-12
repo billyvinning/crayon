@@ -23,5 +23,5 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 
 clean:
 	@echo " Cleaning..."; 
-	@echo " $(RM) -r $(BUILDDIR) $(BINDIR)"; $(RM) -r $(BUILDDIR) $(BINDIR)
+	@echo " $(RM) -r $(BUILDDIR) $(BINDIR) $(LIBDIR)"; $(RM) -r $(BUILDDIR) $(BINDIR) $(LIBDIR)
 

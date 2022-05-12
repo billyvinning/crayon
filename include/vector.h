@@ -1,18 +1,14 @@
 #ifndef _VECTOR_H_
 #define _VECTOR_H_
 
-//struct vec3 {
-//    double[3] position;
-//    double[3] direction;
-//    double t;
-//}
 
-double dot_product(double a[], double b[], int n);
-void cross_product(double a[], double b[], double out[]);
-double mag2(double a[], int n);
-double mag(double a[], int n);
-void norm(double a[], double out[], int n);
-double cos_theta(double a[], double b[], int n);
-double theta(double a[], double b[], int n);
 
-#endif
+double dot_product(const double a[], const double b[], unsigned int n);
+void cross_product(const double a[3], const double b[3], double out[3]);
+double mag2(const double a[], unsigned int n);
+double mag(const double a[], unsigned int n);
+void norm(const double a[], double out[], unsigned int n);
+double cos_theta(const double a[], const double b[], unsigned int n);
+double theta(const double a[], const double b[], unsigned int n);
+
+#endif  // INCLUDE_VECTOR_H_"
