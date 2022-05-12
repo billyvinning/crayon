@@ -1,7 +1,7 @@
 crayon
 ======
 
-.. image:: test_img.ppm
+.. image:: test_img.png
   :width: 400
 
 A ray tracer in ANSI C.
