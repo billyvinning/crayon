@@ -21,8 +21,13 @@ Vec3 make_vec(double x, double y, double z) {
 }
 
 
+double dot_product(Vec3 a, Vec3 b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+
 double get_vec_norm_squared(Vec3 v) {
-    return pow(v.x, 2) + pow(v.y, 2) + pow(v.z, 2); 
+    return dot_product(v, v);
 }
 
 
@@ -49,6 +54,12 @@ Vec3 add_vecs(Vec3 a, Vec3 b) {
         a.z + b.z
     );
     return result;
+}
+
+
+Vec3 sub_vecs(Vec3 a, Vec3 b) {
+    return add_vecs(a, scale_vec(b, -1.0 ));
+
 }
 
 

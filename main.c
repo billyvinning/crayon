@@ -1,10 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+
 #include "vec.h"
 #include "ray.h"
 
 
-Vec3 get_colour_vec(const Ray r) {
+bool is_hit_sphere(Vec3 center, double radius, Ray r) {
+    Vec3 oc = sub_vecs(r.position, center);
+    double a = dot_product(r.direction, r.direction);
+    double b = 2.0 * dot_product(oc, r.direction);
+    double c = dot_product(oc, oc) - radius * radius;
+    double discriminant = b * b - 4 * a * c;
+    return discriminant > 0;
+}
+
+
+Vec3 get_colour_vec(Ray r) {
+    if (is_hit_sphere(make_vec(0, 0, -1), 0.5, r))
+        return make_vec(1, 0, 0);
     Vec3 unit_direction = make_unit_vec(r.direction);
     double t = 0.5 * (unit_direction.y + 1.0);
     Vec3 v1 = scale_vec(make_vec(1.0, 1.0, 1.0), 1.0 - t);
