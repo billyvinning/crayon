@@ -32,7 +32,7 @@ double get_vec_norm_squared(Vec3 v) {
 
 
 double get_vec_norm(Vec3 v) {
-    return pow(get_vec_norm_squared(v), 0.5);
+    return sqrt(get_vec_norm_squared(v));
 }
 
 
@@ -42,23 +42,21 @@ Vec3 make_unit_vec(Vec3 v) {
 }
 
 Vec3 scale_vec(Vec3 v, double t) {
-    Vec3 result = make_vec(v.x * t, v.y * t, v.z * t);
-    return result;
+    return make_vec(v.x * t, v.y * t, v.z * t);
 }
 
 
 Vec3 add_vecs(Vec3 a, Vec3 b) {
-    Vec3 result = make_vec(
+    return make_vec(
         a.x + b.x,
         a.y + b.y,
         a.z + b.z
     );
-    return result;
 }
 
 
 Vec3 sub_vecs(Vec3 a, Vec3 b) {
-    return add_vecs(a, scale_vec(b, -1.0 ));
+    return add_vecs(a, scale_vec(b, -1.0));
 
 }
 
