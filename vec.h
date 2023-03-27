@@ -1,6 +1,7 @@
 #ifndef VEC_H
 #define VEC_H
 
+#include <stdbool.h>
 #include <math.h>
 
 typedef struct {
@@ -69,6 +70,26 @@ Vec3 reflect(Vec3 v, Vec3 n) {
             2.0 * dot_product(v, n)
         )
     );
+}
+
+bool refract(Vec3 v, Vec3 n, double ni_over_nt, Vec3 * refracted) {
+    Vec3 uv = make_unit_vec(v);
+    double dt = dot_product(uv, n);
+    double discriminant = 1.0 - (ni_over_nt * ni_over_nt * (1.0 - (dt * dt)));
+    if (discriminant > 0) {
+        Vec3 tmp = sub_vecs(
+            scale_vec(sub_vecs(v, scale_vec(n, dt)), ni_over_nt),
+            scale_vec(n, sqrt(discriminant))
+        ); 
+
+        refracted->x = tmp.x;
+        refracted->y = tmp.y;
+        refracted->z = tmp.z;
+        return true;
+    }
+    else
+        return false;
+
 }
 
 

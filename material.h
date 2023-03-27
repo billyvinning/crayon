@@ -2,6 +2,6 @@
 #define MATERIAL_H
     
 
-enum Material {LAMBERTIAN, METAL};
+enum Material {LAMBERTIAN, METAL, DIELECTRIC};
 
 #endif

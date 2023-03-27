@@ -99,6 +99,57 @@ bool scatter_metal(Ray r, HitRecord rec, Vec3 * attenuation, Ray * scattered){
     return dot_product(reflected, rec.normal) > 0;
 }
 
+
+double schlick(double cosine, double ref_idx) {
+    double r0 = (1.0 - ref_idx) / (1.0 + ref_idx);
+    r0 = r0 * r0;
+    return r0 + (1.0 - r0) * pow((1.0 - cosine), 5);
+}
+
+
+bool scatter_dielectric(Ray r, HitRecord rec, Vec3 * attenuation, Ray * scattered) {
+    double ref_idx = 1.5;
+    Vec3 outward_normal;
+    Vec3 reflected = reflect(r.direction, rec.normal);
+    double ni_over_nt;
+    attenuation->x = 1.0;
+    attenuation->y = 1.0;
+    attenuation->z = 1.0;
+    Vec3 refracted;
+    double reflect_prob;
+    double cosine;
+    if (dot_product(r.direction, rec.normal) > 0) {
+        outward_normal = scale_vec(rec.normal, -1.0);
+        ni_over_nt = ref_idx;
+        cosine = ref_idx * dot_product(r.direction, rec.normal) / get_vec_norm(r.direction);
+    }
+    else {
+        outward_normal = rec.normal;
+        ni_over_nt = 1.0 / ref_idx;
+        cosine = -dot_product(r.direction, rec.normal) / get_vec_norm(r.direction);
+    }
+    if (refract(r.direction, outward_normal, ni_over_nt, &refracted)) {
+        reflect_prob = schlick(cosine, ref_idx);
+    }
+    else {
+        scattered->position = rec.p;
+        scattered->direction = reflected;
+        reflect_prob = 1.0;
+    }
+    if (get_rand() < reflect_prob) {
+        scattered->position = rec.p;
+        scattered->direction = reflected;
+    }
+    else {
+        scattered->position = rec.p;
+        scattered->direction = reflected;
+    }
+
+    return true;
+
+}
+
+
 Vec3 get_colour_vec(Ray r, Sphere spheres[], int num_spheres, int depth) {
     HitRecord rec;
     if (has_hit_any_sphere(spheres, num_spheres, r, 0.001, DBL_MAX, &rec)) {
@@ -108,8 +159,13 @@ Vec3 get_colour_vec(Ray r, Sphere spheres[], int num_spheres, int depth) {
         switch (rec.material) {
             case LAMBERTIAN:
                 is_scatter = scatter_lambertian(r, rec, &attenuation, &scattered);
+                break;
             case METAL:
                 is_scatter = scatter_metal(r, rec, &attenuation, &scattered);
+                break;
+            case DIELECTRIC:
+                is_scatter = scatter_dielectric(r, rec, &attenuation, &scattered);
+                break;
         }
         if (depth < 50 && is_scatter) {
             return hadamard_product(
@@ -152,7 +208,7 @@ void simple_trace(int nx, int ny, int ns) {
             make_vec(0.0, 0.0, -1.0),
             0.5,
             LAMBERTIAN,
-            make_vec(0.8, 0.3, 0.3)
+            make_vec(0.1, 0.2, 0.5)
         },
         {
             make_vec(0.0, -100.5, -1.0),
@@ -169,8 +225,8 @@ void simple_trace(int nx, int ny, int ns) {
         {
             make_vec(-1.0, 0.0, -1.0),
             0.5,
-            METAL,
-            make_vec(0.8, 0.8, 0.8)
+            DIELECTRIC,
+            make_vec(0.0, 0.0, 0.0)
         }
     };
     Camera cam = {
