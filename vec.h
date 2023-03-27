@@ -61,4 +61,21 @@ Vec3 sub_vecs(Vec3 a, Vec3 b) {
 }
 
 
+Vec3 reflect(Vec3 v, Vec3 n) {
+    return sub_vecs(
+        v,
+        scale_vec(
+            n,
+            2.0 * dot_product(v, n)
+        )
+    );
+}
+
+
+Vec3 hadamard_product(Vec3 a, Vec3 b) {
+    return make_vec(
+        a.x * b.x, a.y * b.y, a.z * b.z
+    );
+}
+
 #endif

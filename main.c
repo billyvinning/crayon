@@ -51,25 +51,75 @@ bool has_hit_any_sphere(
             rec->normal = temp_rec.normal;
             rec->t = temp_rec.t;
             rec->p = temp_rec.p;
+            rec->material = temp_rec.material;
+            rec->albedo = temp_rec.albedo;
         }
     }
     return has_hit_anything;
 }
 
 
-Vec3 get_colour_vec(Ray r, Sphere spheres[], int num_spheres) {
+bool scatter_lambertian(Ray r, HitRecord rec, Vec3 * attenuation, Ray * scattered) {
+    Vec3 target = add_vecs(
+        add_vecs(
+            rec.p,
+            rec.normal
+        ),
+        random_in_unit_sphere()
+    );
+    Ray tmp = {rec.p, sub_vecs(target, rec.p)};
+    scattered->position = tmp.position;
+    scattered->direction = tmp.direction;
+    attenuation->x = rec.albedo.x;
+    attenuation->y = rec.albedo.y;
+    attenuation->z = rec.albedo.z;
+    return true;
+}
+
+
+bool scatter_metal(Ray r, HitRecord rec, Vec3 * attenuation, Ray * scattered){
+    Vec3 reflected = reflect(
+        make_unit_vec(r.direction),
+        rec.normal
+    );
+    double fuzz = 1.0;
+    reflected = add_vecs(
+        reflected,
+        scale_vec(
+            random_in_unit_sphere(),
+            fuzz
+        )
+    );
+    Ray tmp = {rec.p, reflected}; 
+    scattered->position = tmp.position;
+    scattered->direction = tmp.direction;
+    attenuation->x = rec.albedo.x;
+    attenuation->y = rec.albedo.y;
+    attenuation->z = rec.albedo.z;
+    return dot_product(reflected, rec.normal) > 0;
+}
+
+Vec3 get_colour_vec(Ray r, Sphere spheres[], int num_spheres, int depth) {
     HitRecord rec;
-    if (has_hit_any_sphere(spheres, num_spheres, r, 0.0, DBL_MAX, &rec)) {
-        Vec3 target = add_vecs(
-            add_vecs(
-                rec.p,
-                rec.normal
-            ),
-            random_in_unit_sphere()
-        );
-        Ray temp_ray = {rec.p, sub_vecs(target, rec.p)};
-        Vec3 c = get_colour_vec(temp_ray, spheres, num_spheres);
-        return scale_vec(c, 0.5);
+    if (has_hit_any_sphere(spheres, num_spheres, r, 0.001, DBL_MAX, &rec)) {
+        Ray scattered;
+        Vec3 attenuation;
+        bool is_scatter = false;
+        switch (rec.material) {
+            case LAMBERTIAN:
+                is_scatter = scatter_lambertian(r, rec, &attenuation, &scattered);
+            case METAL:
+                is_scatter = scatter_metal(r, rec, &attenuation, &scattered);
+        }
+        if (depth < 50 && is_scatter) {
+            return hadamard_product(
+                attenuation,
+                get_colour_vec(scattered, spheres, num_spheres, depth+1)
+            ); 
+        }
+        else {
+            return make_vec(0.0, 0.0, 0.0);
+        }    
     }
     else {
         Vec3 unit_direction = make_unit_vec(r.direction);
@@ -96,10 +146,32 @@ void simple_trace(int nx, int ny, int ns) {
     file = fopen("img.ppm", "w");
 
     fprintf(file, "P3\n%d %d\n255\n", nx, ny);
-    int num_spheres = 2;
+    int num_spheres = 4;
     Sphere spheres[] = {
-        {make_vec(0.0, 0.0, -1.0), 0.5},
-        {make_vec(0.0, -100.5, -1.0), 100.0}
+        {
+            make_vec(0.0, 0.0, -1.0),
+            0.5,
+            LAMBERTIAN,
+            make_vec(0.8, 0.3, 0.3)
+        },
+        {
+            make_vec(0.0, -100.5, -1.0),
+            100.0,
+            LAMBERTIAN,
+            make_vec(0.8, 0.8, 0.0)
+        },
+        {
+            make_vec(1.0, 0.0, -1.0),
+            0.5,
+            METAL,
+            make_vec(0.8, 0.6, 0.2)
+        },
+        {
+            make_vec(-1.0, 0.0, -1.0),
+            0.5,
+            METAL,
+            make_vec(0.8, 0.8, 0.8)
+        }
     };
     Camera cam = {
         make_vec(0.0, 0.0, 0.0),
@@ -116,7 +188,7 @@ void simple_trace(int nx, int ny, int ns) {
 
                 Ray r = get_ray(cam, u, v);
                 c = add_vecs(
-                    c, get_colour_vec(r, spheres, num_spheres)
+                    c, get_colour_vec(r, spheres, num_spheres, 0)
                 );
             }
             c = scale_vec(c, 1.0 / (double) ns);

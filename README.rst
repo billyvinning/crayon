@@ -6,7 +6,7 @@ A ray tracer in C99. This project follows Peter Shirley's "Ray Tracing in One We
 Build
 -----
 
-To build the package, execute the following:
+To build the package with GCC 12.2.1, execute the following:
 
 .. code-block:: console
 
@@ -16,5 +16,5 @@ To build the package, execute the following:
 License
 -------
 
-The project is licensed under the GPLv3 license.
+This project is licensed under the GPLv3 license.
 

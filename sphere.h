@@ -5,10 +5,14 @@
 #include "vec.h"
 #include "hittable.h"
 #include "ray.h"
+#include "material.h"
+
 
 typedef struct {
     Vec3 center;
     double radius;
+    enum Material material;
+    Vec3 albedo;
 } Sphere;
 
 
@@ -27,6 +31,8 @@ bool has_hit_sphere(Sphere s, Ray r, double t_min, double t_max, HitRecord * rec
                 sub_vecs(rec->p, s.center), 1.0 / s.radius
             );
             rec->normal = normal;
+            rec->material = s.material;
+            rec->albedo = s.albedo;
             return true;
         }
         tmp = (-b + sqrt((b * b) - (a * c))) / a;
@@ -37,6 +43,8 @@ bool has_hit_sphere(Sphere s, Ray r, double t_min, double t_max, HitRecord * rec
                 sub_vecs(rec->p, s.center), 1.0 / s.radius
             );
             rec->normal = normal;
+            rec->material = s.material;
+            rec->albedo = s.albedo;
             return true;
         }
 
