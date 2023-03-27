@@ -7,6 +7,7 @@
 #include "vec.h"
 #include "ray.h"
 #include "sphere.h"
+#include "camera.h"
 
 
 bool has_hit_any_sphere(
@@ -65,7 +66,11 @@ Vec3 get_colour_vec(Ray r, Sphere spheres[], int num_spheres) {
     }
 }
 
-void simpleTrace(int nx, int ny) {
+double get_rand(void) {
+    return (float) rand() / (float) (RAND_MAX - 1);
+}
+
+void simple_trace(int nx, int ny, int ns) {
     /* Propagate nx * ny rays from each pixel center backwards towards
      * the origin.
      */
@@ -73,32 +78,30 @@ void simpleTrace(int nx, int ny) {
     file = fopen("img.ppm", "w");
 
     fprintf(file, "P3\n%d %d\n255\n", nx, ny);
-
-    Vec3 lower_left_corner = make_vec(-2.0, -1.0, -1.0);
-    Vec3 horizontal = make_vec(4.0, 0.0, 0.0);
-    Vec3 vertical = make_vec(0.0, 2.0, 0.0);
-    Vec3 position = make_vec(0.0, 0.0, 0.0);
     int num_spheres = 2;
     Sphere spheres[] = {
         {make_vec(0.0, 0.0, -1.0), 0.5},
         {make_vec(0.0, -100.5, -1.0), 100.0}
     };
-
+    Camera cam = {
+        make_vec(0.0, 0.0, 0.0),
+        make_vec(-2.0, -1.0, -1.0),
+        make_vec(4.0, 0.0, 0.0),
+        make_vec(0.0, 2.0, 0.0)
+    };
     for (int j = ny - 1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
-            double u = (double) i / (double) nx;
-            double v = (double) j / (double) ny;
+            Vec3 c = make_vec(0.0, 0.0, 0.0);
+            for (int s = 0; s < ns; s++) {
+                double u = ((double) i + get_rand()) / (double) nx;
+                double v = ((double) j + get_rand()) / (double) ny;
 
-            Vec3 direction = add_vecs(
-                lower_left_corner,
-                add_vecs(
-                    scale_vec(horizontal, u),
-                    scale_vec(vertical, v)
-                )
-            );
-            Ray r = {position, direction};
-            // Vec3 p = propagate_ray(r, 2.0);
-            Vec3 c = get_colour_vec(r, spheres, num_spheres);
+                Ray r = get_ray(cam, u, v);
+                c = add_vecs(
+                    c, get_colour_vec(r, spheres, num_spheres)
+                );
+            }
+            c = scale_vec(c, 1.0 / (double) ns);
             int ir = (int) 255.99 * c.x;
             int ig = (int) 255.99 * c.y;
             int ib = (int) 255.99 * c.z;
@@ -110,7 +113,7 @@ void simpleTrace(int nx, int ny) {
 
 }
 
-void makeGradient(int nx, int ny) {
+void make_gradient(int nx, int ny) {
     printf("P3\n%d %d\n255\n", nx, ny);
     for (int j = ny - 1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
@@ -129,6 +132,6 @@ void makeGradient(int nx, int ny) {
 }
 
 int main(void) {
-    simpleTrace(200, 100);
+    simple_trace(200, 100, 100);
     return EXIT_SUCCESS;
 }
