@@ -202,6 +202,23 @@ void simple_trace(int nx, int ny, int ns) {
     file = fopen("img.ppm", "w");
 
     fprintf(file, "P3\n%d %d\n255\n", nx, ny);
+
+    //int num_spheres = 4;
+    //double R = cos(3.14159265358979323846 / 4);
+    //Sphere spheres[] = {
+    //    {
+    //        make_vec(-R, 0.0, -1.0),
+    //        R,
+    //        LAMBERTIAN,
+    //        make_vec(0.0, 0.0, 1.0)
+    //    },
+    //    {
+    //        make_vec(R, 0.0, -1.0),
+    //        R,
+    //        LAMBERTIAN,
+    //        make_vec(1.0, 0.0, 0.0)
+    //    }
+    //};
     int num_spheres = 4;
     Sphere spheres[] = {
         {
@@ -229,12 +246,13 @@ void simple_trace(int nx, int ny, int ns) {
             make_vec(0.0, 0.0, 0.0)
         }
     };
-    Camera cam = {
-        make_vec(0.0, 0.0, 0.0),
-        make_vec(-2.0, -1.0, -1.0),
-        make_vec(4.0, 0.0, 0.0),
-        make_vec(0.0, 2.0, 0.0)
-    };
+    Camera cam = make_camera(
+        make_vec(-2.0, 2.0, 1.0),
+        make_vec(0.0, 0.0, -1.0),
+        make_vec(0.0, 1.0, 0.0),
+        45.0,
+        (double) nx / (double) ny
+    );
     for (int j = ny - 1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
             Vec3 c = make_vec(0.0, 0.0, 0.0);

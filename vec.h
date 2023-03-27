@@ -99,4 +99,12 @@ Vec3 hadamard_product(Vec3 a, Vec3 b) {
     );
 }
 
+Vec3 cross_product(Vec3 a, Vec3 b) {
+    return make_vec(
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x
+    );
+}
+
 #endif
