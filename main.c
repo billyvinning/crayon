@@ -8,26 +8,7 @@
 #include "ray.h"
 #include "sphere.h"
 #include "camera.h"
-
-
-double get_rand(void) {
-    return (float) rand() / (float) (RAND_MAX - 1);
-}
-
-
-Vec3 random_in_unit_sphere(void) {
-    Vec3 p;
-    do {
-        p = sub_vecs(
-                scale_vec(
-                    make_vec(get_rand(), get_rand(), get_rand()),
-                    2.0
-                ),
-            make_vec(1.0, 1.0, 1.0)
-        );
-    } while (dot_product(p, p) >= 1.0);
-    return p;
-}
+#include "utils.h"
 
 
 bool has_hit_any_sphere(
@@ -204,7 +185,7 @@ void simple_trace(int nx, int ny, int ns) {
     fprintf(file, "P3\n%d %d\n255\n", nx, ny);
 
     //int num_spheres = 4;
-    //double R = cos(3.14159265358979323846 / 4);
+    //double R = cos(PI / 4);
     //Sphere spheres[] = {
     //    {
     //        make_vec(-R, 0.0, -1.0),
@@ -246,12 +227,20 @@ void simple_trace(int nx, int ny, int ns) {
             make_vec(0.0, 0.0, 0.0)
         }
     };
+
+    Vec3 lookfrom = make_vec(3.0, 3.0, 2.0);
+    Vec3 lookat = make_vec(0.0, 0.0, -1.0);
+    float dist_to_focus = get_vec_norm(sub_vecs(lookfrom, lookat));
+    float aperture = 2.0;
+
     Camera cam = make_camera(
-        make_vec(-2.0, 2.0, 1.0),
-        make_vec(0.0, 0.0, -1.0),
+        lookfrom,
+        lookat,
         make_vec(0.0, 1.0, 0.0),
-        45.0,
-        (double) nx / (double) ny
+        20,
+        (double) nx / (double) ny,
+        aperture,
+        dist_to_focus
     );
     for (int j = ny - 1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {

@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <math.h>
+#include "utils.h"
 
 typedef struct {
     double x;
@@ -106,5 +107,37 @@ Vec3 cross_product(Vec3 a, Vec3 b) {
         a.x * b.y - a.y * b.x
     );
 }
+
+
+
+Vec3 random_in_unit_sphere(void) {
+    Vec3 p;
+    do {
+        p = sub_vecs(
+                scale_vec(
+                    make_vec(get_rand(), get_rand(), get_rand()),
+                    2.0
+                ),
+            make_vec(1.0, 1.0, 1.0)
+        );
+    } while (dot_product(p, p) >= 1.0);
+    return p;
+}
+
+
+Vec3 random_in_unit_disk(void) {
+    Vec3 p;
+    do {
+        p = sub_vecs(
+                scale_vec(
+                    make_vec(get_rand(), get_rand(), 0.0),
+                    2.0
+                ),
+            make_vec(1.0, 1.0, 0.0)
+        );
+    } while (dot_product(p, p) >= 1.0);
+    return p;
+}
+
 
 #endif
