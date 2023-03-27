@@ -1,7 +1,9 @@
 crayon
 ======
 
-![A sample render.](./preview.png)
+.. image:: ./preview.png
+  :width: 400
+  :alt: A sample render.
 
 A ray tracer in C99. This project follows Peter Shirley's "Ray Tracing in One Weekend".
 
