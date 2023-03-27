@@ -10,6 +10,26 @@
 #include "camera.h"
 
 
+double get_rand(void) {
+    return (float) rand() / (float) (RAND_MAX - 1);
+}
+
+
+Vec3 random_in_unit_sphere(void) {
+    Vec3 p;
+    do {
+        p = sub_vecs(
+                scale_vec(
+                    make_vec(get_rand(), get_rand(), get_rand()),
+                    2.0
+                ),
+            make_vec(1.0, 1.0, 1.0)
+        );
+    } while (dot_product(p, p) >= 1.0);
+    return p;
+}
+
+
 bool has_hit_any_sphere(
     Sphere spheres[],
     int num_spheres,
@@ -39,16 +59,17 @@ bool has_hit_any_sphere(
 
 Vec3 get_colour_vec(Ray r, Sphere spheres[], int num_spheres) {
     HitRecord rec;
-    bool has_hit = has_hit_any_sphere(spheres, num_spheres, r, 0.0, DBL_MAX, &rec);
-    if (has_hit) {
-        return scale_vec(
-            make_vec(
-                rec.normal.x + 1.0,
-                rec.normal.y + 1.0,
-                rec.normal.z + 1.0
+    if (has_hit_any_sphere(spheres, num_spheres, r, 0.0, DBL_MAX, &rec)) {
+        Vec3 target = add_vecs(
+            add_vecs(
+                rec.p,
+                rec.normal
             ),
-            0.5
+            random_in_unit_sphere()
         );
+        Ray temp_ray = {rec.p, sub_vecs(target, rec.p)};
+        Vec3 c = get_colour_vec(temp_ray, spheres, num_spheres);
+        return scale_vec(c, 0.5);
     }
     else {
         Vec3 unit_direction = make_unit_vec(r.direction);
@@ -66,9 +87,6 @@ Vec3 get_colour_vec(Ray r, Sphere spheres[], int num_spheres) {
     }
 }
 
-double get_rand(void) {
-    return (float) rand() / (float) (RAND_MAX - 1);
-}
 
 void simple_trace(int nx, int ny, int ns) {
     /* Propagate nx * ny rays from each pixel center backwards towards
@@ -102,6 +120,7 @@ void simple_trace(int nx, int ny, int ns) {
                 );
             }
             c = scale_vec(c, 1.0 / (double) ns);
+            c = make_vec(sqrt(c.x), sqrt(c.y), sqrt(c.z));
             int ir = (int) 255.99 * c.x;
             int ig = (int) 255.99 * c.y;
             int ib = (int) 255.99 * c.z;
