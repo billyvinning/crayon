@@ -174,6 +174,64 @@ Vec3 get_colour_vec(Ray r, Sphere spheres[], int num_spheres, int depth) {
     }
 }
 
+void get_random_scene(Sphere * spheres, int n) {
+    Sphere sphere = {
+        make_vec(0.0, -1000.0, 0.0),
+        1000.0,
+        LAMBERTIAN,
+        make_vec(0.5, 0.5, 0.5)
+    };
+    spheres[0] = sphere;
+
+    int i = 1;
+    for (int a = -11; a < 11; a++) {
+        for (int b = -11; b < 11; b++) {
+            if (i >= n - 3)
+                break;
+            float choose_mat = get_rand();
+            Vec3 center = make_vec(a + 0.9 * get_rand(), 0.2, b + 0.9 * get_rand());
+            float len = get_vec_norm(sub_vecs(center, make_vec(4, 0.2, 0.0)));
+            if ((len > 0.9)) {
+                if (choose_mat < 0.8) {
+                    Sphere sphere = {
+                        center,
+                        0.2,
+                        LAMBERTIAN,
+                        make_vec(
+                            get_rand() * get_rand(),
+                            get_rand() * get_rand(),
+                            get_rand() * get_rand()
+                        )
+                    };
+                    spheres[i++] = sphere;
+                }
+                else if (choose_mat < 0.95) {
+                    Vec3 c = make_vec(
+                        0.5 * (1.0 + get_rand()),
+                        0.5 * (1.0 + get_rand()),
+                        0.5 * (1.0 + get_rand())
+                    );
+                    Sphere sphere = {center, 0.2, METAL, c};
+                    spheres[i++] = sphere;
+                }
+                else {
+                    Sphere sphere = {center, 0.2, DIELECTRIC, make_vec(0., 0., 0.)};
+                    spheres[i++] = sphere;
+                }
+            if (i >= n - 3)
+                break;
+            }
+        }
+    }
+    Sphere sphere1 = {make_vec(0.0, 1.0, 0.0), 1.0, DIELECTRIC, make_vec(0.0, 0.0, 0.0)};
+    spheres[i++] = sphere1;
+    Sphere sphere2 = {make_vec(-4.0, 1.0, 0.0), 1.0, LAMBERTIAN, make_vec(0.4, 0.2, 0.1)};
+    spheres[i++] = sphere2;
+    //Sphere sphere3 = {make_vec(4.0, 1.0, 0.0), 1.0, METAL, make_vec(0.7, 0.6, 0.5)};
+    //spheres[i++] = sphere3;
+    return;
+}
+
 
 void simple_trace(int nx, int ny, int ns) {
     /* Propagate nx * ny rays from each pixel center backwards towards
@@ -200,38 +258,42 @@ void simple_trace(int nx, int ny, int ns) {
     //        make_vec(1.0, 0.0, 0.0)
     //    }
     //};
-    int num_spheres = 4;
-    Sphere spheres[] = {
-        {
-            make_vec(0.0, 0.0, -1.0),
-            0.5,
-            LAMBERTIAN,
-            make_vec(0.1, 0.2, 0.5)
-        },
-        {
-            make_vec(0.0, -100.5, -1.0),
-            100.0,
-            LAMBERTIAN,
-            make_vec(0.8, 0.8, 0.0)
-        },
-        {
-            make_vec(1.0, 0.0, -1.0),
-            0.5,
-            METAL,
-            make_vec(0.8, 0.6, 0.2)
-        },
-        {
-            make_vec(-1.0, 0.0, -1.0),
-            0.5,
-            DIELECTRIC,
-            make_vec(0.0, 0.0, 0.0)
-        }
-    };
+    //int num_spheres = 4;
+    //Sphere spheres[] = {
+    //    {
+    //        make_vec(0.0, 0.0, -1.0),
+    //        0.5,
+    //        LAMBERTIAN,
+    //        make_vec(0.1, 0.2, 0.5)
+    //    },
+    //    {
+    //        make_vec(0.0, -100.5, -1.0),
+    //        100.0,
+    //        LAMBERTIAN,
+    //        make_vec(0.8, 0.8, 0.0)
+    //    },
+    //    {
+    //        make_vec(1.0, 0.0, -1.0),
+    //        0.5,
+    //        METAL,
+    //        make_vec(0.8, 0.6, 0.2)
+    //    },
+    //    {
+    //        make_vec(-1.0, 0.0, -1.0),
+    //        0.5,
+    //        DIELECTRIC,
+    //        make_vec(0.0, 0.0, 0.0)
+    //    }
+    //};
+    //
+    int num_spheres = 500;
+    Sphere spheres[num_spheres];
+    get_random_scene(spheres, num_spheres);
 
-    Vec3 lookfrom = make_vec(3.0, 3.0, 2.0);
-    Vec3 lookat = make_vec(0.0, 0.0, -1.0);
-    float dist_to_focus = get_vec_norm(sub_vecs(lookfrom, lookat));
-    float aperture = 2.0;
+    Vec3 lookfrom = make_vec(13.0, 2.0, 3.0);
+    Vec3 lookat = make_vec(0.0, 0.0, 0.0);
+    float dist_to_focus = 10.0;
+    float aperture = 0.1;
 
     Camera cam = make_camera(
         lookfrom,
